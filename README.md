@@ -1,2 +1,3 @@
-# CommunityHousingNetwork
-This is dashboard created to provide  inputs to team to help arrange funds
+Note: Run Makefile to download the data required. 
+
+This is the dashboard created to provide inputs to CHN team.
