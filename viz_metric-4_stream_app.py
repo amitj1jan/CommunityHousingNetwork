@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     
     args = parser.parse_args()    
-    args.ASSETS_PATH = 'assets/'s
+    args.ASSETS_PATH = 'assets/'
     args.COST_BURDEN_INCOME = 'cost_burden_income.csv'
     args.COST_BURDEN_TENURE = 'cost_burden_tenure.csv'
     
