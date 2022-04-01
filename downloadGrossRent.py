@@ -26,6 +26,13 @@ def createPredicatesGrossRent(tableId, var_cnt):
   return(predicates)
 
 def download_data(base_uri,predicates, path, filename, headers=''):
+    '''
+    downloads data for costBurden Metric
+    base_uri - HUD API URI (https://www.huduser.gov/hudapi/public/chas)
+    predicates - parameters used to connect to API
+    path - system path, where downloaded needs to be written
+    filename - filename, which would be used to write the downloaded data
+    '''    
     filepath = path + filename
     if os.path.isfile(filepath):
         print(filepath)
@@ -42,20 +49,15 @@ def download_data(base_uri,predicates, path, filename, headers=''):
         
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser()
-#     parser.add_argument('BASE_URI', help='base uri of dataset API')
-    parser.add_argument('ASSET_PATH', help='input path for datasets')
-    parser.add_argument('OUTPUT_FILE', help='GrossRent by BedRooms file (json)')
+    parser.add_argument('BASE_URI', help='base uri of dataset API')
+    parser.add_argument('ASSET_PATH', help='path for datasets (input)')
+    parser.add_argument('OUTPUT_FILE', help='GrossRent by BedRooms output dataset file (json)')
     
     args = parser.parse_args()
-    
     GROSS_RENT_BY_BEDROOMS  = 'GrossRentByBedRooms.json'
-
-    datasets_and_uris = {}
-    datasets_and_uris[GROSS_RENT_BY_BEDROOMS] = "https://api.census.gov/data/2019/acs/acs1" 
     
     # GrossRentByBedrooms
     tableId = 'B25031'
     var_cnt = 7
     predicates = createPredicatesGrossRent(tableId, var_cnt)
-    download_data(datasets_and_uris[GROSS_RENT_BY_BEDROOMS], predicates, args.ASSET_PATH, args.OUTPUT_FILE)             
-    
+    download_data(args.BASE_URI, predicates, args.ASSET_PATH, args.OUTPUT_FILE)     
