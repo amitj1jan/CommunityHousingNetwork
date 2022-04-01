@@ -72,9 +72,9 @@ tooltipTitle = 'Cost Burdened Households'
 
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser()
-    parser.add_argument('ASSETS_PATH', help='input path for datasets')
-    parser.add_argument('COST_BURDEN_INCOME', help='Cost burden by income transformed file (csv)')
-    parser.add_argument('COST_BURDEN_TENURE', help='Cost burden by income transformed file (csv)')      
+#     parser.add_argument('ASSETS_PATH', help='input path for datasets')
+#     parser.add_argument('COST_BURDEN_INCOME', help='Cost burden by income transformed file (csv)')
+#     parser.add_argument('COST_BURDEN_TENURE', help='Cost burden by income transformed file (csv)')      
 
     
     args = parser.parse_args()    
