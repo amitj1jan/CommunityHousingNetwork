@@ -73,12 +73,15 @@ tooltipTitle = 'Cost Burdened Households'
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser()
     parser.add_argument('ASSETS_PATH', help='input path for datasets')
-    parser.add_argument('COST_BURDEN_INCOME', help='GrossRent by BedRooms file (json)')
-    parser.add_argument('COST_BURDEN_TENURE', help='GrossRent by BedRooms file (json)')      
+    parser.add_argument('COST_BURDEN_INCOME', help='Cost burden by income transformed file (csv)')
+    parser.add_argument('COST_BURDEN_TENURE', help='Cost burden by income transformed file (csv)')      
 
     
     args = parser.parse_args()    
-        
+    args.ASSETS_PATH = 'assets/'s
+    args.COST_BURDEN_INCOME = 'cost_burden_income.csv'
+    args.COST_BURDEN_TENURE = 'cost_burden_tenure.csv'
+    
     cost_burden_income_df = pd.read_csv(args.ASSETS_PATH + args.COST_BURDEN_INCOME)
     income_cols = list(cost_burden_income_df.columns) 
     county_list = tuple(cost_burden_income_df.county.unique())
@@ -89,6 +92,7 @@ if __name__ == '__main__':
     
     bars = createBars(cost_burden_income_df, income_cols, county, labelTitle, tooltipTitle, household_incomes_ord)
     text = createText(cost_burden_income_df, income_cols, county, labelTitle, household_incomes_ord)
+                      
 
     income_chart = (bars + text
                      ).properties(width=600, height=400, title={"text" : 'Cost Burden By Income - ' + f'{county} (2014-2018)',
