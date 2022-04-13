@@ -1,8 +1,6 @@
-import streamlit as st
 import altair as alt
 from altair import datum
 import pandas as pd
-import numpy as np
 import argparse
 alt.renderers.enable('svg')
 
@@ -26,7 +24,7 @@ def createBars(df, cols, county, labelTitle, tooltipTitle, col_sort_order):
                 color=alt.Color(f'{metricCol1}:N',
                     scale=alt.Scale(domain=cost_burden_display, range=range_),
                     legend=alt.Legend(orient='none', direction='horizontal',
-                    legendX=-50, legendY=-30, title=f'{labelTitle}', 
+                    legendY=-30, title=f'{labelTitle}', 
                     titleAnchor='middle', titleFontSize=15)),
                 order=alt.Order('cost_burden_index:Q', sort='ascending'),
                 tooltip=[
@@ -72,27 +70,24 @@ tooltipTitle = 'Cost Burdened Households'
 
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser()
-#     parser.add_argument('ASSETS_PATH', help='input path for datasets')
-#     parser.add_argument('COST_BURDEN_INCOME', help='Cost burden by income transformed file (csv)')
-#     parser.add_argument('COST_BURDEN_TENURE', help='Cost burden by income transformed file (csv)')      
-
+    parser.add_argument('ASSETS_PATH', help='input path for datasets')
+    parser.add_argument('COUNTY', help='GrossRent by BedRooms file (json)')
+    parser.add_argument('COST_BURDEN_INCOME', help='Cost burden by income transformed file (csv)')
+    parser.add_argument('COST_BURDEN_TENURE', help='Cost burden by tenure transformed file (csv)')
+    parser.add_argument('GROSS_RENT_BY_BEDROOMS', help='GrossRent by BedRooms file (csv)')    
+    parser.add_argument('COST_BURDEN_INCOME_IMG', help='Cost burden by income output viz file (html)')
+    parser.add_argument('COST_BURDEN_TENURE_IMG', help='Cost burden by tenure output viz file(html)')
+    parser.add_argument('GROSS_RENT_BY_BEDROOMS_IMG', help='GrossRent by BedRooms file (html)')    
     
-    args = parser.parse_args()    
-    args.ASSETS_PATH = 'assets/'
-    args.COST_BURDEN_INCOME = 'cost_burden_income.csv'
-    args.COST_BURDEN_TENURE = 'cost_burden_tenure.csv'
+    args = parser.parse_args()            
+    county = args.COUNTY
     
+# create visualization for metric - cost_burden_by_income    
     cost_burden_income_df = pd.read_csv(args.ASSETS_PATH + args.COST_BURDEN_INCOME)
-    income_cols = list(cost_burden_income_df.columns) 
-    county_list = tuple(cost_burden_income_df.county.unique())
-    add_county = st.sidebar.selectbox(
-                    'Which County you would like to explore?',
-                       county_list)
-    county = add_county
-    
+    income_cols = list(cost_burden_income_df.columns)
+
     bars = createBars(cost_burden_income_df, income_cols, county, labelTitle, tooltipTitle, household_incomes_ord)
     text = createText(cost_burden_income_df, income_cols, county, labelTitle, household_incomes_ord)
-                      
 
     income_chart = (bars + text
                      ).properties(width=600, height=400, title={"text" : 'Cost Burden By Income - ' + f'{county} (2014-2018)',
@@ -102,11 +97,11 @@ if __name__ == '__main__':
                                               "anchor":"start"}
                     ).configure_view(strokeWidth=0
                     ).configure_axis(labelFontSize=15, 
-                                     grid=False, domain=False)  
+                         grid=False, domain=False,labelLimit=250
+                    ).configure_legend(labelLimit=0)    
+    income_chart.save(args.ASSETS_PATH + args.COST_BURDEN_INCOME_IMG, embed_options={'renderer':'svg'})
     
-#     income_chart.save(args.ASSETS_PATH + args.COST_BURDEN_INCOME_IMG, embed_options={'renderer':'svg'})
-    
-    
+# create visualization for metric - cost_burden_by_tenure    
     cost_burden_tenure_df = pd.read_csv(args.ASSETS_PATH + args.COST_BURDEN_TENURE)
     tenure_cols = list(cost_burden_tenure_df.columns)
 
@@ -121,55 +116,21 @@ if __name__ == '__main__':
                                               "anchor":"start"}
                     ).configure_view(strokeWidth=0
                     ).configure_axis(labelFontSize=15, 
-                                     grid=False, domain=False)
+                                     grid=False, domain=False,labelLimit=250
+                    ).configure_legend(labelLimit=0)    
+    tenure_chart.save(args.ASSETS_PATH + args.COST_BURDEN_TENURE_IMG, embed_options={'renderer':'svg'})
     
-#     tenure_chart.save(args.ASSETS_PATH + args.COST_BURDEN_TENURE_IMG, embed_options={'renderer':'svg'})
-
-    county = add_county
-    gross_rent_est_df = pd.read_csv(args.ASSETS_PATH + 'gross_rent_est.csv')
+# create visualization for metric - gross_rent_by_bedrooms    
     sort_order = ['No Rooms', '1 Room', '2 Rooms', '3 Rooms', '4 Rooms', '5 or more Rooms']
-    gross_rent_by_bedrooms_chart = alt.Chart(gross_rent_est_df).mark_bar(color='orange').encode(
-                x=alt.X('No_of_Rooms:N', sort=sort_order, axis=alt.Axis(title='')),
-                y = alt.Y('Rent:Q',axis=alt.Axis(title='Median Gross Rent in Dollars -($)')),
-                tooltip=['No_of_Rooms', 'Rent']
+    gross_rent_est_df = pd.read_csv(args.ASSETS_PATH + args.GROSS_RENT_BY_BEDROOMS)
+    bars = alt.Chart(gross_rent_est_df).mark_bar(color='orange').encode(
+            x=alt.X('No_of_Rooms:N', sort=sort_order, axis=alt.Axis(title='')),
+            y = alt.Y('Rent:Q',axis=alt.Axis(title='Median Gross Rent in Dollars -($)')),
+            tooltip=['No_of_Rooms', 'Rent']
     ).transform_filter(datum.NAME == f'{county}'
-    ).configure_title(fontSize=20
-    ).configure_axis(labelFontSize=15, titleFontSize=17
-    ).properties(width=600, height=400, title='Median Gross Rent by Bedrooms - ' + f'{county}')
+    ).properties(width=350, height=350, title='Median Gross Rent by Bedrooms - ' + f'{county}')
 
-    # gross_rent_by_bedrooms_chart = bars.configure_title(fontSize=20
-    # ).configure_axis(labelFontSize=15, titleFontSize=17)
-
-    st.title('CHN Affordable Housing Dashboard')
-    st.title('')
-
-    choosen_metric = st.sidebar.selectbox(
-        'Which metric you would like to see?',
-        ('Cost burden by Income', 'Cost burden by Tenure', 'Gross Rent By Bedrooms')
-    )
-
-    explore_metric = st.sidebar.selectbox(
-        'How you would like to explore metric?',
-        ('Explore Tabular Data', 'Explore Chart')
-    )
-
-    indx = np.where(cost_burden_income_df['county'] == county)
-
-    if choosen_metric == 'Cost burden by Income':
-        if explore_metric == 'Explore Tabular Data':
-            st.write(cost_burden_income_df.loc[indx])
-        else:
-            st.altair_chart(income_chart, use_container_width=True)
-        st.write('Source: https://www.huduser.gov/hudapi/public/chas')
-    elif choosen_metric == 'Cost burden by Tenure':
-        if explore_metric == 'Explore Tabular Data':
-            st.write(cost_burden_tenure_df)
-        else:        
-            st.altair_chart(tenure_chart, use_container_width=True)
-        st.write('Source: https://www.huduser.gov/hudapi/public/chas')
-    else:
-        if explore_metric == 'Explore Tabular Data':
-            st.write(gross_rent_est_df[gross_rent_est_df['NAME'] == county])
-        else:
-            st.altair_chart(gross_rent_by_bedrooms_chart)
-        st.write('Source: https://api.census.gov/')
+    grossRentByBedrooms_chart = bars.configure_title(fontSize=20
+    ).configure_axis(labelFontSize=15, titleFontSize=17)    
+    
+    grossRentByBedrooms_chart.save(args.ASSETS_PATH + args.GROSS_RENT_BY_BEDROOMS_IMG, embed_options={'renderer':'svg'})
